@@ -1,0 +1,48 @@
+// SLiM simulation script to simulate genetic processes from an underdominance selection
+// model with an arbitrary recombination map. The selection coefficients are simulated
+// from a Gamma distribution
+
+
+initialize() {
+
+    initializeTreeSeq();
+    initializeMutationRate(MUTATION_RATE);
+
+    // /1000 is coming from /N in the previous code with N=1000
+    scriptForQTLs = "-0.5 * rgamma(n=1, mean=shape*scale, shape=shape)*2*(w^2)/1000 / 1e10;";
+    initializeMutationType("m1", 1e10, "s", scriptForQTLs);
+
+    // g1 genomic element type: uses m1 for all mutations
+    initializeGenomicElementType("g1", m1, 1.0);
+    // Recombination map of chromosome #CHR
+    map = readCSV(RECOMBINATION_MAP, sep="\t");
+    // SLiM chromosome starts from position 0 and not position 1, while recombination map starts from position 1.
+    ends = map.getValue("Position(bp)")-1;
+    // Rates are in cM/Mb, so we need to convert it to recombination rate
+    rates = map.getValue("Rate(cM/Mb)") * 1e-8;
+    // End position
+    end_location = max(ends);
+
+    initializeGenomicElement(g1, 0, end_location);
+    initializeRecombinationRate(rates, ends);
+
+    // Set demes demography
+    source("demes-slim/demes.slim");
+    defineConstant("SCALING_FACTOR", 1.0);
+
+    setSeed(SEED);
+
+}
+
+1 early() {
+    model = demes_load(JSON_FILE, scaling_factor=SCALING_FACTOR, burn_in=0.0);
+    demes_schedule_events(model);
+    g_end = model.getValue("end_time");
+    community.rescheduleScriptBlock(s1, g_end, g_end);
+}
+
+// Output the tree sequence file at the end of the simulation.
+s1 late() {
+    dbg(self);  // Print the current script block as it's executed.
+    sim.treeSeqOutput(tree_filename);
+}

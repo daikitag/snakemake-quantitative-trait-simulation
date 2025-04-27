@@ -1,0 +1,35 @@
+# Causal mutation rate per site
+mu: 1e-10
+# Parameter of stabilizing selection model (w)
+w: 1
+# Shape of Gamma distribution
+shape: 1
+# Scale of Gamma distribution
+scale: 10
+# Filename of recombination map in "recombination_map" directory
+# This should be a text file, and do not add ".txt" suffix to filename
+recombination_map: "sample"
+# Filename of JSON demography file in "demography" directory
+# Do not add ".json" suffix to filename
+demography: "demography"
+# SLiM simulation seed
+slim_seed: 1
+
+# Degree of pleiotropic effects
+degree: 100
+# Effect size simulation seed
+effect_size_seed: 2
+
+# Narrow-sense heritability
+h2: 0.4
+# Phenotype simulation seed
+phenotype_seed: 3
+
+# Neutral mutation rate
+neutral_mu: 1e-8
+# Ancestral Ne
+ancestral_Ne: 3600
+# Seed for recapitation
+recapitate_seed: 4
+# Neutral simulation and recapitation seed
+neutral_seed: 5

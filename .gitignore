@@ -1,0 +1,6 @@
+.snakemake
+logs/*
+output/*
+recombination_map/*
+*.ipynb
+*.tree

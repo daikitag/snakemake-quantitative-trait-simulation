@@ -1,0 +1,158 @@
+configfile: "config/config.yaml"
+
+# These are SLiM simulation parameters
+MU = config["mu"]
+W = config["w"]
+SHAPE = config["shape"]
+SCALE = config["scale"]
+RECOMBINATION_MAP = config["recombination_map"]
+DEMOGRAPHY = config["demography"]
+SLIM_SEED = config["slim_seed"]
+
+# These are effect size simulation parameters
+DEGREE = config["degree"]
+EFFECT_SIZE_SEED = config["effect_size_seed"]
+
+# These are phenotype simulation parameters
+H2 = config["h2"]
+PHENOTYPE_SEED = config["phenotype_seed"]
+
+# These are recapitate and neutral simulation parameters
+NEUTRAL_MU = config["neutral_mu"]
+ANCESTRAL_NE = config["ancestral_Ne"]
+RECAPITATE_SEED = config["recapitate_seed"]
+NEUTRAL_SEED = config["neutral_seed"]
+
+# These are the basic parameters of the simulation
+basic_pattern = (
+    "mu_{mu}_w_{w}_shape_{shape}_scale_{scale}_map_{recombination_map}"
+    "_dem_{demography}"
+)
+
+# I previously had "output/" + basic_pattern, but the file name became too big to open on the computer
+folder_pattern = (
+    "output/"
+)
+
+# These parameters are used to simulate the initial tree sequence
+slim_treeseq_pattern = (
+    basic_pattern + "_slimseed_{slim_seed}"
+)
+
+# These parameters are used to simulate effect sizes from mutation's selection coefficients
+effect_size_pattern = (
+    slim_treeseq_pattern + "_degree_{degree}_effectseed_{effect_size_seed}"
+)
+
+# These parameters are used to simulate phenotypes of individuals
+phenotype_pattern = (
+    effect_size_pattern + "_h2_{h2}_phenoseed_{phenotype_seed}"
+)
+
+# These parameters are used for simulating neutral burn-in (recapitation) and neutral mutations
+recapitate_neutral_pattern = (
+    slim_treeseq_pattern + "_ancestralNe_{ancestral_Ne}_recapseed_{recapitate_seed}" +
+    "_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}"
+)
+
+sim_results_tree = expand(
+    f"{folder_pattern}/processed_tree/{recapitate_neutral_pattern}.tree",
+    mu=MU, w=W, shape=SHAPE, scale=SCALE, recombination_map=RECOMBINATION_MAP,
+    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
+    recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED
+)
+
+sim_results_plink_phenotype = expand(
+    f"{folder_pattern}/plink_phenotype/{phenotype_pattern}.txt",
+    mu=MU, w=W, shape=SHAPE, scale=SCALE, recombination_map=RECOMBINATION_MAP,
+    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, degree=DEGREE,
+    effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED
+)
+
+rule all:
+    input:
+        sim_results_tree,
+        sim_results_plink_phenotype,
+
+rule slim_underdominance:
+    output:
+        f"{folder_pattern}/tree/{slim_treeseq_pattern}.tree",
+    log:
+        f"logs/slim/{slim_treeseq_pattern}.log",
+    conda:
+        "envs/slim.yaml"
+    shell:
+        (
+            "slim -d MUTATION_RATE={wildcards.mu} -d w={wildcards.w} -d shape={wildcards.shape} "
+            + "-d scale={wildcards.scale} -d SEED={wildcards.slim_seed} -d 'tree_filename=\"{output}\"' "
+            + "-d 'RECOMBINATION_MAP=\"recombination_map/{wildcards.recombination_map}.txt\"' "
+            + "-d 'JSON_FILE=\"demography/{wildcards.demography}.json\"' "
+            + "workflow/scripts/underdominance_demography_genetic_map.slim > {log}"
+        )
+
+
+rule effect_size_simulation:
+    output:
+        f"{folder_pattern}/effect_size/{effect_size_pattern}.csv",
+    input:
+        f"{folder_pattern}/tree/{slim_treeseq_pattern}.tree",
+    log:
+        f"logs/effect_size/{effect_size_pattern}.log",
+    params:
+        w=lambda wildcards: wildcards.w,
+        degree=lambda wildcards: wildcards.degree,
+        seed=lambda wildcards: wildcards.effect_size_seed,
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/effect_size_simulation.py"
+
+
+rule phenotype_simulation:
+    output:
+        f"{folder_pattern}/phenotype/{phenotype_pattern}.csv",
+    input:
+        ts=f"{folder_pattern}/tree/{slim_treeseq_pattern}.tree",
+        mutation_df=f"{folder_pattern}/effect_size/{effect_size_pattern}.csv",
+    params:
+        h2=lambda wildcards: wildcards.h2,
+        seed=lambda wildcards: wildcards.phenotype_seed,
+    log:
+        f"logs/phenotype/{phenotype_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/phenotype_simulation.py"
+
+rule plink_phenotype:
+    output:
+        f"{folder_pattern}/plink_phenotype/{phenotype_pattern}.txt",
+    input:
+        ts=f"{folder_pattern}/tree/{slim_treeseq_pattern}.tree",
+        phenotype_df=f"{folder_pattern}/phenotype/{phenotype_pattern}.csv",
+    log:
+        f"logs/plink_phenotype/{phenotype_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/obtain_plink_phenotype.py"
+    
+
+rule neutral_recapitate_simulation:
+    output:
+        f"{folder_pattern}/processed_tree/{recapitate_neutral_pattern}.tree",
+    input:
+        f"{folder_pattern}/tree/{slim_treeseq_pattern}.tree",
+    log:
+        f"logs/neutral_recapitate/{recapitate_neutral_pattern}.log",
+    params:
+        genetic_map=lambda wildcards: f"recombination_map/{wildcards.recombination_map}.txt",
+        ancestral_Ne = lambda wildcards: wildcards.ancestral_Ne,
+        recapitate_seed = lambda wildcards: wildcards.recapitate_seed,
+        neutral_mu = lambda wildcards: wildcards.neutral_mu,
+        neutral_seed = lambda wildcards: wildcards.neutral_seed,
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/neutral_recapitate_simulation.py"
