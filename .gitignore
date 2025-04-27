@@ -1,6 +1,7 @@
 .snakemake
 logs/*
 output/*
-recombination_map/*
+recombination_map/*.txt
+demography/*.json
 *.ipynb
 *.tree
