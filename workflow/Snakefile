@@ -31,7 +31,7 @@ basic_pattern = (
 
 # I previously had "output/" + basic_pattern, but the file name became too big to open on the computer
 folder_pattern = (
-    "output/"
+    "output"
 )
 
 # These parameters are used to simulate the initial tree sequence
