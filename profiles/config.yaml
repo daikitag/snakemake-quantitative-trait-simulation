@@ -1,0 +1,9 @@
+# configuration file for slurm
+executor: slurm
+jobs: 400
+default-resources:
+    slurm_account: "tagami"
+    slurm_partition: "standard-statgen-cpu"
+    cpus_per_task: 1
+    mem_mb_per_cpu: 36000
+    runtime: "10h"

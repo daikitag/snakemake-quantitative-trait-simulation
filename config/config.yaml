@@ -7,8 +7,9 @@ shape: 1
 # Scale of Gamma distribution
 scale: 10
 # Filename of recombination map in "recombination_map" directory
-# This should be a text file, and do not add ".txt" suffix to filename
-recombination_map: "sample"
+# This should be a number to specify the chromosome number in
+# recombination map file
+chromosome: 1
 # Filename of JSON demography file in "demography" directory
 # Do not add ".json" suffix to filename
 demography: "demography"
