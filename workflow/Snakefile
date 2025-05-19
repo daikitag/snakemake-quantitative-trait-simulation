@@ -83,7 +83,7 @@ rule all:
 
 rule slim_underdominance:
     output:
-        f"{folder_pattern}/tree_{slim_treeseq_pattern}.tree",
+        f"{folder_pattern}/slim_allele_tree_{slim_treeseq_pattern}.tree",
     log:
         f"logs/{output_pattern}/slim_{slim_treeseq_pattern}.log",
     conda:
@@ -98,6 +98,17 @@ rule slim_underdominance:
             + "workflow/scripts/underdominance_demography_genetic_map.slim > {log}"
         )
         
+rule convert_allele:
+    output:
+        f"{folder_pattern}/tree_{slim_treeseq_pattern}.tree",
+    input:
+        f"{folder_pattern}/slim_allele_tree_{slim_treeseq_pattern}.tree",
+    log:
+        f"logs/{output_pattern}/convert_allele_{slim_treeseq_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/convert_allele.py"
 
 rule effect_size_simulation:
     output:

@@ -15,10 +15,10 @@ w: 1
 # Filename of recombination map in "recombination_map" directory
 # This should be a number to specify the chromosome number in
 # recombination map file
-chromosome: 30
+chromosome: 22
 # Filename of JSON demography file in "demography" directory
 # Do not add ".json" suffix to filename
-demography: "small_demography"
+demography: "demography"
 # SLiM simulation seed
 slim_seed: 1
 
