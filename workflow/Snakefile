@@ -57,7 +57,7 @@ recapitate_neutral_pattern = (
 )
 
 sim_results_tree = expand(
-    f"{folder_pattern}/processed_tree_{recapitate_neutral_pattern}.tree",
+    f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree",
     mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
     demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
     recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
