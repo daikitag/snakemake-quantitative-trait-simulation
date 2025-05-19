@@ -155,7 +155,7 @@ rule plink_phenotype:
 
 rule neutral_recapitate_simulation:
     output:
-        f"{folder_pattern}/processed_ts.tree",
+        f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree",
     input:
         f"{folder_pattern}/nucleotide_ts.tree",
     log:
