@@ -32,7 +32,7 @@ SELECTION_SCALING_PARAMETER = config["scaling_selection"]
 # These parameters are the basis of all simulations
 output_pattern = (
     "mu_{mu}_w_{w}_shape_{shape}_scale_{scale}_N_{N}_chromosome_{chromosome}"
-    "_dem_{demography}"    
+    "_dem_{demography}_slimseed_{slim_seed}"
 )
 
 # Folder pattern
@@ -40,14 +40,9 @@ folder_pattern = (
     "output/" + output_pattern
 )
 
-# These parameters are used to simulate the initial tree sequence
-slim_treeseq_pattern = (
-    "slimseed_{slim_seed}"
-)
-
 # These parameters are used to simulate effect sizes from mutation's selection coefficients
 effect_size_pattern = (
-    slim_treeseq_pattern + "_degree_{degree}_effectseed_{effect_size_seed}"
+    "degree_{degree}_effectseed_{effect_size_seed}"
 )
 
 # These parameters are used to simulate phenotypes of individuals
@@ -57,7 +52,7 @@ phenotype_pattern = (
 
 # These parameters are used for simulating neutral burn-in (recapitation) and neutral mutations
 recapitate_neutral_pattern = (
-    slim_treeseq_pattern + "_ancestralNe_{ancestral_Ne}_recapseed_{recapitate_seed}" +
+    "ancestralNe_{ancestral_Ne}_recapseed_{recapitate_seed}" +
     "_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}"
 )
 
@@ -83,9 +78,9 @@ rule all:
 
 rule slim_underdominance:
     output:
-        f"{folder_pattern}/slim_allele_tree_{slim_treeseq_pattern}.tree",
+        f"{folder_pattern}/slim_allele_ts.tree",
     log:
-        f"logs/{output_pattern}/slim_{slim_treeseq_pattern}.log",
+        f"logs/{output_pattern}/slim.log",
     conda:
         "envs/slim.yaml"
     shell:
@@ -100,11 +95,11 @@ rule slim_underdominance:
         
 rule convert_allele:
     output:
-        f"{folder_pattern}/tree_{slim_treeseq_pattern}.tree",
+        f"{folder_pattern}/nucleotide_ts.tree",
     input:
-        f"{folder_pattern}/slim_allele_tree_{slim_treeseq_pattern}.tree",
+        f"{folder_pattern}/slim_allele_ts.tree",
     log:
-        f"logs/{output_pattern}/convert_allele_{slim_treeseq_pattern}.log",
+        f"logs/{output_pattern}/convert_allele.log",
     conda:
         "envs/simulation.yaml"
     script:
@@ -114,7 +109,7 @@ rule effect_size_simulation:
     output:
         f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
     input:
-        f"{folder_pattern}/tree_{slim_treeseq_pattern}.tree",
+        f"{folder_pattern}/nucleotide_ts.tree",
     log:
         f"logs/{output_pattern}/effect_size_{effect_size_pattern}.log",
     params:
@@ -132,7 +127,7 @@ rule phenotype_simulation:
     output:
         f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
     input:
-        ts=f"{folder_pattern}/tree_{slim_treeseq_pattern}.tree",
+        ts=f"{folder_pattern}/nucleotide_ts.tree",
         mutation_df=f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
     params:
         h2=lambda wildcards: wildcards.h2,
@@ -148,7 +143,7 @@ rule plink_phenotype:
     output:
         f"{folder_pattern}/plink_phenotype_{phenotype_pattern}.txt",
     input:
-        ts=f"{folder_pattern}/tree_{slim_treeseq_pattern}.tree",
+        ts=f"{folder_pattern}/nucleotide_ts.tree",
         phenotype_df=f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
     log:
         f"logs/{output_pattern}/plink_phenotype_{phenotype_pattern}.log",
@@ -160,9 +155,9 @@ rule plink_phenotype:
 
 rule neutral_recapitate_simulation:
     output:
-        f"{folder_pattern}/processed_tree_{recapitate_neutral_pattern}.tree",
+        f"{folder_pattern}/processed_ts.tree",
     input:
-        f"{folder_pattern}/tree_{slim_treeseq_pattern}.tree",
+        f"{folder_pattern}/nucleotide_ts.tree",
     log:
         f"logs/{output_pattern}/neutral_recapitate_{recapitate_neutral_pattern}.log",
     params:
