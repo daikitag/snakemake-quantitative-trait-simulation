@@ -10,7 +10,7 @@ def convert_allele(ts):
     return ts
 
 def main():    
-    ts = tskit.load(snk.input[ts])
+    ts = tskit.load(snk.input[0])
     
     ts = convert_allele(ts)
     
