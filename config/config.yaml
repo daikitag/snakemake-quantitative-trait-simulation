@@ -1,18 +1,24 @@
 # Causal mutation rate per site
 mu: 1e-10
-# Parameter of stabilizing selection model (w)
-w: 1
+
+# Gamma distribution parameters for simulating population-scaled
+# mutation size
 # Shape of Gamma distribution
 shape: 1
 # Scale of Gamma distribution
 scale: 10
+# Population size of population-scaled mutation size
+N: 1e4
+# Parameter of stabilizing selection model (w)
+w: 1
+
 # Filename of recombination map in "recombination_map" directory
 # This should be a number to specify the chromosome number in
 # recombination map file
-chromosome: 1
+chromosome: 30
 # Filename of JSON demography file in "demography" directory
 # Do not add ".json" suffix to filename
-demography: "demography"
+demography: "small_demography"
 # SLiM simulation seed
 slim_seed: 1
 
@@ -34,3 +40,10 @@ ancestral_Ne: 3600
 recapitate_seed: 4
 # Neutral simulation and recapitation seed
 neutral_seed: 5
+
+# These parameters are important for simulations
+# but they do not need to be modified
+
+# Scaling for selection coefficient to conduct underdominance
+# selection simulation
+scaling_selection: 1e10

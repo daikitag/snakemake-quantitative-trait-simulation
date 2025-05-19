@@ -2,7 +2,6 @@
 logs/*
 output/*
 recombination_map/*.txt
-demography/*.json
-demography/*.yaml
 *.ipynb
 *.tree
+*.svg

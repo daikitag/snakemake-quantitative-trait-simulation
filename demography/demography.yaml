@@ -1,0 +1,50 @@
+# Population model adapted from the out of Africa model in
+# https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_homsap_models_outofafricaarchaicadmixture_5r19
+description: Two population model adapted from the Ragsdale and Gravel (2019) Out of Africa model
+doi:
+- https://doi.org/10.1371/journal.pgen.1000695
+time_units: years
+generation_time: 29
+
+demes:
+- name: ancestral
+  description: Equilibrium/root population
+  epochs:
+  - {end_time: 300e3, start_size: 3600}
+- name: YRI
+  description: Yoruba in Ibadan, Nigeria
+  ancestors: [ancestral]
+  epochs:
+  # 40 generations * 29 = 1160
+  - {end_time: 1160, start_size: 13900}
+- name: EXPLOSIVE_YRI
+  description: YRI population after explosive growth
+  ancestors: [YRI]
+  epochs:
+  # Growth of 50 times in 40 generations
+  - {start_size: 13900, end_size: 695000}
+- name: OOA
+  description: Bottleneck out-of-Africa population
+  ancestors: [YRI]
+  start_time: 60700
+  epochs:
+  - {end_time: 36000, start_size: 880}
+- name: CEU
+  description: Utah Residents (CEPH) with Northern and Western European Ancestry
+  ancestors: [OOA]
+  epochs:
+  # The end size 10311 is caulculated from the exponential growth formula:
+  # 2300 * 1.00125 ** (36000/29 - 40)
+  # 0.00125 is the growth rate per generation
+  - {end_time: 1160, start_size: 2300, end_size: 10311}
+- name: EXPLOSIVE_CEU
+  description: CEU population after explosive growth
+  ancestors: [CEU]
+  epochs:
+  # Growth of 50 times in 40 generations
+  - {start_size: 10311, end_size: 515550}
+
+migrations:
+- {demes: [YRI, OOA], rate: 52.2e-5}
+- {demes: [YRI, CEU], rate: 2.48e-5}
+- {demes: [EXPLOSIVE_YRI, EXPLOSIVE_CEU], rate: 2.48e-5}

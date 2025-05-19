@@ -2,8 +2,8 @@
 
 #SBATCH --time 10:00:00
 
-#SBATCH --output="/vols/bitbucket/tagami/job_output/slurm/%x-%A-std-output.out"
-#SBATCH --error="/vols/bitbucket/tagami/job_output/slurm/%x-%A-err-output.out"
+#SBATCH --output="/vols/bitbucket/tagami/job_output/snakemake/%x-%A-std-output.out"
+#SBATCH --error="/vols/bitbucket/tagami/job_output/snakemake/%x-%A-err-output.out"
 
 #SBATCH --mail-user=daiki.tagami@hertford.ox.ac.uk
 #SBATCH --mail-type=ALL
@@ -15,6 +15,8 @@
 #SBATCH --partition=standard-statgen-cpu
 
 source /vols/bitbucket/tagami/python_environment/tskit_env/bin/activate
+
+cd /vols/bitbucket/tagami/snakemake-quantitative-trait-simulation
 
 snakemake --workflow-profile /vols/bitbucket/tagami/snakemake-quantitative-trait-simulation/profiles --use-conda
 

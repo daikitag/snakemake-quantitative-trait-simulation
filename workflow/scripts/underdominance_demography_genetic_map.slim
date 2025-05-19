@@ -1,6 +1,6 @@
 // SLiM simulation script to simulate genetic processes from an underdominance selection
-// model with an arbitrary recombination map. The selection coefficients are simulated
-// from a Gamma distribution
+// model with an arbitrary recombination map. The population-scaled mutation sizes
+// are simulated from a Gamma distribution
 
 
 initialize() {
@@ -8,9 +8,12 @@ initialize() {
     initializeTreeSeq();
     initializeMutationRate(MUTATION_RATE);
 
-    // /1000 is coming from /N in the previous code with N=1000
-    scriptForQTLs = "-0.5 * rgamma(n=1, mean=shape*scale, shape=shape)*2*(w^2)/1000 / 1e10;";
-    initializeMutationType("m1", 1e10, "s", scriptForQTLs);
+    // The beginning `-0.5` is coming from how we are modeling stabilizing selection
+    // model by using underdominance selection model
+    // The second term represents selection coefficient in the stabilizing selection
+    // model, a^2/w^2
+    scriptForQTLs = "-0.5 * rgamma(n=1, mean=shape*scale, shape=shape)/(2*N*w^2) / selection_scaling;";
+    initializeMutationType("m1", selection_scaling, "s", scriptForQTLs);
 
     // g1 genomic element type: uses m1 for all mutations
     initializeGenomicElementType("g1", m1, 1.0);
@@ -40,8 +43,6 @@ initialize() {
     g_end = model.getValue("end_time");
     community.rescheduleScriptBlock(s1, g_end, g_end);
 }
-
-// Output the tree sequence file at the end of the simulation.
 s1 late() {
     dbg(self);  // Print the current script block as it's executed.
     sim.treeSeqOutput(tree_filename);
