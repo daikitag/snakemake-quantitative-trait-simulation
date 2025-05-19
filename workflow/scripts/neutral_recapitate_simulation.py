@@ -13,7 +13,6 @@ def simulate_neutral_mutation(ts, neutral_rate, seed):
     ts = msprime.sim_mutations(
            ts,
            rate=neutral_rate,
-           model=msprime.SLiMMutationModel(type=0, next_id=next_id),
            keep=True,
            random_seed=seed,
     )
