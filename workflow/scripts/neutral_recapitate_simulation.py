@@ -9,7 +9,6 @@ from snakemake.script import snakemake as snk
 def simulate_neutral_mutation(ts, neutral_rate, seed):
     # Simulate neutral mutations on top of a SLiM tree sequence output
     # Taken from https://tskit.dev/pyslim/docs/latest/tutorial.html#adding-neutral-mutations-to-a-slim-simulation
-    next_id = pyslim.next_slim_mutation_id(ts)
     ts = msprime.sim_mutations(
            ts,
            rate=neutral_rate,
