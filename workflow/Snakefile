@@ -30,9 +30,11 @@ NEUTRAL_SEED = config["neutral_seed"]
 SELECTION_SCALING_PARAMETER = config["scaling_selection"]
 
 # These parameters are the basis of all simulations
+# Put chromosome in a different directory, as we will be using the same
+# parameter combinations for simulating various chromosomes
 output_pattern = (
-    "mu_{mu}_w_{w}_shape_{shape}_scale_{scale}_N_{N}_chromosome_{chromosome}"
-    "_dem_{demography}_slimseed_{slim_seed}"
+    "mu_{mu}_w_{w}_shape_{shape}_scale_{scale}_N_{N}"
+    "_dem_{demography}_slimseed_{slim_seed}/chromosome_{chromosome}"
 )
 
 # Folder pattern
