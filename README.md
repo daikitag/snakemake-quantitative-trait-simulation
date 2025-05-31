@@ -24,7 +24,7 @@ Our multi-dimensional stabilizing selection model is adapted from Simons et al. 
 \vec{r}=\sum_{l=1}^L(\vec{a}_l+\vec{a}_{l'}),
 ```
 
-where $`\vec{a}_1`$ and $`\vec{a}_{l'}`$ are the phenotypic effects of the parents' alleles at site $l$. If we let $a=||\vec{a}||$ as the size of mutations in the $n$-dimensional trait space, the selection coefficient of a mutation can be expressed as $s=a^2/w^2$. Since we are assuming a diploid setting, the population-scaled selection coefficient can be expressed as
+where $`\vec{a}_l`$ and $`\vec{a}_{l'}`$ are the phenotypic effects of the parents' alleles at site $l$. If we let $a=||\vec{a}||$ as the size of mutations in the $n$-dimensional trait space, the selection coefficient of a mutation can be expressed as $s=a^2/w^2$. Since we are assuming a diploid setting, the population-scaled selection coefficient can be expressed as
 
 ```math
 S=2Ns=2N\frac{a^2}{w^2},
