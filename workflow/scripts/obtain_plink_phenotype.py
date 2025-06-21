@@ -1,4 +1,5 @@
 import pandas as pd
+import tszip
 
 from snakemake.script import snakemake as snk
 

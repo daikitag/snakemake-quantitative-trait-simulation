@@ -26,6 +26,7 @@ ANCESTRAL_NE = config["ancestral_Ne"]
 RECAPITATE_SEED = config["recapitate_seed"]
 NEUTRAL_SEED = config["neutral_seed"]
 
+
 # These are scaling parameters that are important for simulation
 SELECTION_SCALING_PARAMETER = config["scaling_selection"]
 
@@ -97,9 +98,9 @@ rule slim_underdominance:
 
 rule tszip_compression:
     input:
-        f"{folder_pattern}/slim_allele_ts.tree",
+        f"{folder_pattern}/{{sample}}.tree",
     output:
-        f"{folder_pattern}/slim_allele_ts.tree.tsz",
+        f"{folder_pattern}/{{sample}}.tree.tsz",
     conda:
         "envs/simulation.yaml"
     shell:
