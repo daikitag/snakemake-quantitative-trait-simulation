@@ -2,7 +2,7 @@ import msprime
 import numpy as np
 import pandas as pd
 import pyslim
-import tskit
+import tszip
 
 from snakemake.script import snakemake as snk
 
@@ -40,7 +40,7 @@ def obtain_ratemap(filename):
 
 def main():
     
-    ts = tskit.load(snk.input[0])
+    ts = tszip.load(snk.input[0])
     ratemap = obtain_ratemap(snk.params.genetic_map)
     
     ts = recapitate(
@@ -52,7 +52,7 @@ def main():
         ts=ts, neutral_rate=float(snk.params.neutral_mu), seed=int(snk.params.neutral_seed)
     )
     
-    ts.dump(snk.output[0])
+    tszip.compress(ts, snk.output[0])
 
 if __name__ == '__main__':
     main()

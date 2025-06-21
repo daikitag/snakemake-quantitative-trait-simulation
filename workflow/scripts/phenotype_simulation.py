@@ -1,5 +1,5 @@
 import pandas as pd
-import tskit
+import tszip
 import tstrait
 
 from snakemake.script import snakemake as snk
@@ -14,7 +14,7 @@ def simulate_phenotype(ts, mutation_df, h2, seed):
     return phenotype_df
 
 def main():    
-    ts = tskit.load(snk.input.ts)
+    ts = tszip.load(snk.input.ts)
     mutation_df = pd.read_csv(snk.input.mutation_df)
     
     phenotype_df = simulate_phenotype(

@@ -1,5 +1,5 @@
 import pyslim
-import tskit
+import tszip
 
 from snakemake.script import snakemake as snk
 
@@ -10,11 +10,11 @@ def convert_allele(ts):
     return ts
 
 def main():    
-    ts = tskit.load(snk.input[0])
+    ts = tszip.load(snk.input[0])
     
     ts = convert_allele(ts)
     
-    ts.dump(snk.output[0])
+    tszip.compress(ts, snk.output[0])
     
 if __name__ == '__main__':
     main()

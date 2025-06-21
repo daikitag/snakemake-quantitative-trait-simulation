@@ -59,7 +59,7 @@ recapitate_neutral_pattern = (
 )
 
 sim_results_tree = expand(
-    f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree",
+    f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
     mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
     demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
     recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
@@ -94,12 +94,22 @@ rule slim_underdominance:
             + "-d 'JSON_FILE=\"demography/{wildcards.demography}.json\"' "
             + "workflow/scripts/underdominance_demography_genetic_map.slim > {log}"
         )
-        
+
+rule tszip_compression:
+    input:
+        "{sample}.tree"
+    output:
+        "{sample}.tree.tsz"
+    conda:
+        "envs/simulation.yaml"
+    shell:
+        "tszip {input}"
+
 rule convert_allele:
     output:
-        f"{folder_pattern}/nucleotide_ts.tree",
+        f"{folder_pattern}/nucleotide_ts.tree.tsz",
     input:
-        f"{folder_pattern}/slim_allele_ts.tree",
+        f"{folder_pattern}/slim_allele_ts.tree.tsz",
     log:
         f"logs/{output_pattern}/convert_allele.log",
     conda:
@@ -111,7 +121,7 @@ rule effect_size_simulation:
     output:
         f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
     input:
-        f"{folder_pattern}/nucleotide_ts.tree",
+        f"{folder_pattern}/nucleotide_ts.tree.tsz",
     log:
         f"logs/{output_pattern}/effect_size_{effect_size_pattern}.log",
     params:
@@ -129,7 +139,7 @@ rule phenotype_simulation:
     output:
         f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
     input:
-        ts=f"{folder_pattern}/nucleotide_ts.tree",
+        ts=f"{folder_pattern}/nucleotide_ts.tree.tsz",
         mutation_df=f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
     params:
         h2=lambda wildcards: wildcards.h2,
@@ -145,7 +155,7 @@ rule plink_phenotype:
     output:
         f"{folder_pattern}/plink_phenotype_{phenotype_pattern}.txt",
     input:
-        ts=f"{folder_pattern}/nucleotide_ts.tree",
+        ts=f"{folder_pattern}/nucleotide_ts.tree.tsz",
         phenotype_df=f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
     log:
         f"logs/{output_pattern}/plink_phenotype_{phenotype_pattern}.log",
@@ -159,7 +169,7 @@ rule neutral_recapitate_simulation:
     output:
         f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree",
     input:
-        f"{folder_pattern}/nucleotide_ts.tree",
+        f"{folder_pattern}/nucleotide_ts.tree.tsz",
     log:
         f"logs/{output_pattern}/neutral_recapitate_{recapitate_neutral_pattern}.log",
     params:

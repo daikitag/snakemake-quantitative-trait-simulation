@@ -11,6 +11,8 @@
 #SBATCH --mem=10G
 #SBATCH --cpus-per-task=1
 
+#SBATCH --job-name="snakemake-slurm"
+
 #SBATCH --cluster=swan
 #SBATCH --partition=standard-statgen-cpu
 #SBATCH --nodelist=smew01.cpu.stats.ox.ac.uk
