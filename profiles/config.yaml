@@ -7,6 +7,6 @@ default-resources:
     slurm_account: "tagami"
     slurm_partition: "standard-statgen-cpu"
     cpus_per_task: 1
-    mem_mb: 200000
+    mem_mb: 40000
     runtime: "20h"
     slurm_extra: "--nodelist=smew01.cpu.stats.ox.ac.uk"
