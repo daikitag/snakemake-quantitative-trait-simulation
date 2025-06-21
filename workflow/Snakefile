@@ -97,9 +97,9 @@ rule slim_underdominance:
 
 rule tszip_compression:
     input:
-        "{sample}.tree"
+        f"{folder_pattern}/slim_allele_ts.tree",
     output:
-        "{sample}.tree.tsz"
+        f"{folder_pattern}/slim_allele_ts.tree.tsz",
     conda:
         "envs/simulation.yaml"
     shell:
