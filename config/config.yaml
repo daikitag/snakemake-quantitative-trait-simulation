@@ -43,6 +43,16 @@ recapitate_seed: 4
 # Neutral simulation and recapitation seed
 neutral_seed: 5
 
+# Number of YRI individuals:
+YRI_number: 3000
+# Number of CEU individuals:
+CEU_number: 3000
+# Seed to select individual IDs:
+individual_seed: 2
+
+# MAF threshold
+MAF: 0.0001
+
 # These parameters are important for simulations
 # but they do not need to be modified
 
