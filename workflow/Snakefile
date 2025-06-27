@@ -30,15 +30,32 @@ NEUTRAL_SEED = config["neutral_seed"]
 # These are scaling parameters that are important for simulation
 SELECTION_SCALING_PARAMETER = config["scaling_selection"]
 
+# These are parameters for selecting individual IDs
+YRI_NUMBER = config["YRI_number"]
+CEU_NUMBER = config["CEU_number"]
+INDIVIDUAL_SEED = config["individual_seed"]
+
+# These are parameters for sampling tree sequence
+MAF = config["MAF"]
+
 # These parameters are the basis of all simulations
 # Put chromosome in a different directory, as we will be using the same
 # parameter combinations for simulating various chromosomes
-output_pattern = (
+basic_pattern_without_chromosome  = (
     "mu_{mu}_w_{w}_shape_{shape}_scale_{scale}_N_{N}"
-    "_dem_{demography}_slimseed_{slim_seed}/chromosome_{chromosome}"
+    "_dem_{demography}_slimseed_{slim_seed}"
 )
 
+output_pattern = (
+    basic_pattern_without_chromosome + "/chromosome_{chromosome}"
+)
+
+
 # Folder pattern
+folder_pattern_without_chromosome = (
+    "output/" + basic_pattern_without_chromosome
+)
+
 folder_pattern = (
     "output/" + output_pattern
 )
@@ -59,12 +76,14 @@ recapitate_neutral_pattern = (
     "_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}"
 )
 
-sim_results_tree = expand(
-    f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
-    mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
-    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
-    recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
-    neutral_seed=NEUTRAL_SEED
+# These parameters are used to select individual IDs
+individual_id_pattern = (
+    "yri_{yri}_ceu_{ceu}_individualseed_{individual_seed}"
+)
+
+# These parameters are used to sample tree sequence
+sample_tree_seq_pattern = (
+    recapitate_neutral_pattern + individual_id_pattern + "_MAF_{maf}"
 )
 
 sim_results_plink_phenotype = expand(
@@ -74,10 +93,21 @@ sim_results_plink_phenotype = expand(
     effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED
 )
 
+final_tree_seq = expand(
+    f"{folder_pattern}/sample_ts_{sample_tree_seq_pattern}.tree",
+    mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
+    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
+    recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+    yri=YRI_NUMBER, ceu=CEU_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    maf=MAF
+)
+
 rule all:
     input:
-        sim_results_tree,
         sim_results_plink_phenotype,
+        final_tree_seq,
 
 rule slim_underdominance:
     output:
@@ -105,6 +135,24 @@ rule tszip_compression:
         "envs/simulation.yaml"
     shell:
         "tszip {input}"
+
+
+rule generate_individual_id:
+    output:
+        f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
+    input:
+        f"{folder_pattern_without_chromosome}/chromosome_{CHROMOSOME[0]}/slim_allele_ts.tree.tsz",
+    log:
+        f"logs/{folder_pattern_without_chromosome}/generate_individual_id_{individual_id_pattern}.log",
+    params:
+        yri_number=lambda wildcards: wildcards.yri,
+        ceu_number=lambda wildcards: wildcards.ceu,
+        seed=lambda wildcards: wildcards.individual_seed,
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/obtain_individual_id.py"
+
 
 rule convert_allele:
     output:
@@ -183,3 +231,19 @@ rule neutral_recapitate_simulation:
         "envs/simulation.yaml"
     script:
         "scripts/neutral_recapitate_simulation.py"
+
+rule sample_tree_seq:
+    output:
+        f"{folder_pattern}/sample_ts_{sample_tree_seq_pattern}.tree",
+    input:
+        ts=f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
+        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
+    params:
+        maf=lambda wildcards: wildcards.maf
+    log:
+        f"logs/{output_pattern}/sample_tree_seq_{sample_tree_seq_pattern}.log"
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/sample_treeseq.py"
+
