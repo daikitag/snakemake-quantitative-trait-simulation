@@ -15,7 +15,29 @@ w: 1
 # Filename of recombination map in "recombination_map" directory
 # This should be a number to specify the chromosome number in
 # recombination map file
-chromosome: 22
+chromosome: 
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
+- 11
+- 12
+- 13
+- 14
+- 15
+- 16
+- 17
+- 18
+- 19
+- 20
+- 21
+- 22
 # Filename of JSON demography file in "demography" directory
 # Do not add ".json" suffix to filename
 demography: "demography"
