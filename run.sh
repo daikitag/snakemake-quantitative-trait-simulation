@@ -17,4 +17,6 @@
 #SBATCH --partition=standard-statgen-cpu
 #SBATCH --nodelist=smew01.cpu.stats.ox.ac.uk
 
-snakemake --workflow-profile profiles --use-conda
+cd /data/smew01/not-backed-up/scratch/tagami/snakemake-quantitative-trait-simulation
+
+snakemake --workflow-profile /data/smew01/not-backed-up/scratch/tagami/snakemake-quantitative-trait-simulation/profiles --use-conda
