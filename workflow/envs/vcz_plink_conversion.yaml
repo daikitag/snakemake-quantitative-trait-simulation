@@ -1,0 +1,5 @@
+channels:
+  - bioconda
+dependencies:
+  - bio2zarr =0.1.6
+  #- vcztools =0.1.0

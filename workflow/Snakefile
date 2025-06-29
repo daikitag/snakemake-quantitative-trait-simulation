@@ -93,8 +93,8 @@ sim_results_plink_phenotype = expand(
     effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED
 )
 
-final_tree_seq = expand(
-    f"{folder_pattern}/sample_ts_{sample_tree_seq_pattern}.tree",
+final_output = expand(
+    f"{folder_pattern}/{sample_tree_seq_pattern}.vcz",
     mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
     demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
     recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
@@ -107,7 +107,7 @@ final_tree_seq = expand(
 rule all:
     input:
         sim_results_plink_phenotype,
-        final_tree_seq,
+        final_output,
 
 rule slim_underdominance:
     output:
@@ -247,3 +247,19 @@ rule sample_tree_seq:
     script:
         "scripts/sample_treeseq.py"
 
+rule generate_vcz:
+    output:
+        directory(f"{folder_pattern}/{sample_tree_seq_pattern}.vcz"),
+    input:
+        f"{folder_pattern}/sample_ts_{sample_tree_seq_pattern}.tree",
+    log:
+        f"logs/{output_pattern}/generate_vcz_{sample_tree_seq_pattern}.log",
+    threads:
+        6
+    resources:
+        cpus_per_task=6,
+        mem_mb_per_cpu=20000
+    conda:
+        "envs/vcz_plink_conversion.yaml"
+    shell:
+        "python3 -m bio2zarr tskit2zarr convert -p {threads} --contig-id {wildcards.chromosome} {input} {output}"
