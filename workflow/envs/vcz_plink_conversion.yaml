@@ -3,4 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - tskit =0.6.4
+  - numpy =2.2
+  - pandas =2.2
+  - tszip =0.2.5
   - bio2zarr =0.1.6

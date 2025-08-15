@@ -16,7 +16,6 @@ w: 1
 # This should be a number to specify the chromosome number in
 # recombination map file
 chromosome: 
-- 21
 - 22
 # Filename of JSON demography file in "demography" directory
 # Do not add ".json" suffix to filename
@@ -44,9 +43,9 @@ recapitate_seed: 4
 neutral_seed: 5
 
 # Number of YRI individuals:
-YRI_number: 3000
+YRI_number: 1000
 # Number of CEU individuals:
-CEU_number: 3000
+CEU_number: 1000
 # Seed to select individual IDs:
 individual_seed: 2
 

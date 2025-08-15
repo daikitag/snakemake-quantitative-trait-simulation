@@ -1,0 +1,178 @@
+{
+  "description": "Two population model adapted from the Ragsdale and Gravel (2019) Out of Africa model",
+  "time_units": "years",
+  "generation_time": 29,
+  "doi": [
+    "https://doi.org/10.1371/journal.pgen.1000695"
+  ],
+  "metadata": {},
+  "demes": [
+    {
+      "name": "ancestral",
+      "description": "Equilibrium/root population",
+      "start_time": "Infinity",
+      "ancestors": [],
+      "proportions": [],
+      "epochs": [
+        {
+          "end_time": 30000.0,
+          "start_size": 36,
+          "end_size": 36,
+          "size_function": "constant",
+          "selfing_rate": 0,
+          "cloning_rate": 0
+        }
+      ]
+    },
+    {
+      "name": "YRI",
+      "description": "Yoruba in Ibadan, Nigeria",
+      "start_time": 30000.0,
+      "ancestors": [
+        "ancestral"
+      ],
+      "proportions": [
+        1.0
+      ],
+      "epochs": [
+        {
+          "end_time": 1160,
+          "start_size": 139,
+          "end_size": 139,
+          "size_function": "constant",
+          "selfing_rate": 0,
+          "cloning_rate": 0
+        }
+      ]
+    },
+    {
+      "name": "EXPLOSIVE_YRI",
+      "description": "YRI population after explosive growth",
+      "start_time": 1160,
+      "ancestors": [
+        "YRI"
+      ],
+      "proportions": [
+        1.0
+      ],
+      "epochs": [
+        {
+          "end_time": 0,
+          "start_size": 139,
+          "end_size": 600,
+          "size_function": "exponential",
+          "selfing_rate": 0,
+          "cloning_rate": 0
+        }
+      ]
+    },
+    {
+      "name": "OOA",
+      "description": "Bottleneck out-of-Africa population",
+      "start_time": 6070,
+      "ancestors": [
+        "YRI"
+      ],
+      "proportions": [
+        1.0
+      ],
+      "epochs": [
+        {
+          "end_time": 3600,
+          "start_size": 23,
+          "end_size": 23,
+          "size_function": "constant",
+          "selfing_rate": 0,
+          "cloning_rate": 0
+        }
+      ]
+    },
+    {
+      "name": "CEU",
+      "description": "Utah Residents (CEPH) with Northern and Western European Ancestry",
+      "start_time": 3600,
+      "ancestors": [
+        "OOA"
+      ],
+      "proportions": [
+        1.0
+      ],
+      "epochs": [
+        {
+          "end_time": 1160,
+          "start_size": 23,
+          "end_size": 103,
+          "size_function": "exponential",
+          "selfing_rate": 0,
+          "cloning_rate": 0
+        }
+      ]
+    },
+    {
+      "name": "EXPLOSIVE_CEU",
+      "description": "CEU population after explosive growth",
+      "start_time": 1160,
+      "ancestors": [
+        "CEU"
+      ],
+      "proportions": [
+        1.0
+      ],
+      "epochs": [
+        {
+          "end_time": 0,
+          "start_size": 103,
+          "end_size": 500,
+          "size_function": "exponential",
+          "selfing_rate": 0,
+          "cloning_rate": 0
+        }
+      ]
+    }
+  ],
+  "migrations": [
+    {
+      "source": "YRI",
+      "dest": "OOA",
+      "start_time": 6070,
+      "end_time": 3600,
+      "rate": 0.000522
+    },
+    {
+      "source": "OOA",
+      "dest": "YRI",
+      "start_time": 6070,
+      "end_time": 3600,
+      "rate": 0.000522
+    },
+    {
+      "source": "YRI",
+      "dest": "CEU",
+      "start_time": 3600,
+      "end_time": 1160,
+      "rate": 2.48e-05
+    },
+    {
+      "source": "CEU",
+      "dest": "YRI",
+      "start_time": 3600,
+      "end_time": 1160,
+      "rate": 2.48e-05
+    },
+    {
+      "source": "EXPLOSIVE_YRI",
+      "dest": "EXPLOSIVE_CEU",
+      "start_time": 1160,
+      "end_time": 0,
+      "rate": 2.48e-05
+    },
+    {
+      "source": "EXPLOSIVE_CEU",
+      "dest": "EXPLOSIVE_YRI",
+      "start_time": 1160,
+      "end_time": 0,
+      "rate": 2.48e-05
+    }
+  ],
+  "pulses": []
+}

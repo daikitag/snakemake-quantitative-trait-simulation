@@ -137,23 +137,6 @@ rule tszip_compression:
         "tszip {input}"
 
 
-rule generate_individual_id:
-    output:
-        f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
-    input:
-        f"{folder_pattern_without_chromosome}/chromosome_{CHROMOSOME[0]}/slim_allele_ts.tree.tsz",
-    log:
-        f"logs/{folder_pattern_without_chromosome}/generate_individual_id_{individual_id_pattern}.log",
-    params:
-        yri_number=lambda wildcards: wildcards.yri,
-        ceu_number=lambda wildcards: wildcards.ceu,
-        seed=lambda wildcards: wildcards.individual_seed,
-    conda:
-        "envs/simulation.yaml"
-    script:
-        "scripts/obtain_individual_id.py"
-
-
 rule convert_allele:
     output:
         f"{folder_pattern}/nucleotide_ts.tree.tsz",
@@ -232,34 +215,38 @@ rule neutral_recapitate_simulation:
     script:
         "scripts/neutral_recapitate_simulation.py"
 
-rule sample_tree_seq:
+rule generate_individual_id:
     output:
-        f"{folder_pattern}/sample_ts_{sample_tree_seq_pattern}.tree",
+        f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
     input:
-        ts=f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
-        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
-    params:
-        maf=lambda wildcards: wildcards.maf
+        f"{folder_pattern_without_chromosome}/chromosome_{CHROMOSOME[0]}/slim_allele_ts.tree.tsz",
     log:
-        f"logs/{output_pattern}/sample_tree_seq_{sample_tree_seq_pattern}.log"
+        f"logs/{folder_pattern_without_chromosome}/generate_individual_id_{individual_id_pattern}.log",
+    params:
+        yri_number=lambda wildcards: wildcards.yri,
+        ceu_number=lambda wildcards: wildcards.ceu,
+        seed=lambda wildcards: wildcards.individual_seed,
     conda:
         "envs/simulation.yaml"
     script:
-        "scripts/sample_treeseq.py"
+        "scripts/obtain_individual_id.py"
 
 rule generate_vcz:
     output:
         directory(f"{folder_pattern}/{sample_tree_seq_pattern}.vcz"),
     input:
-        f"{folder_pattern}/sample_ts_{sample_tree_seq_pattern}.tree",
+        ts=f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
+        individual_id=f"{folder_pattern}/individualid_{individual_id_pattern}.csv",
+    params:
+        maf=lambda wildcards: wildcards.maf,
     log:
-        f"logs/{output_pattern}/generate_vcz_{sample_tree_seq_pattern}.log",
+        f"logs/{output_pattern}/sample_tree_seq_{sample_tree_seq_pattern}.log"
+    conda:
+        "envs/vcz_plink_conversion.yaml"
     threads:
         6
     resources:
         cpus_per_task=6,
         mem_mb_per_cpu=20000
-    conda:
-        "envs/vcz_plink_conversion.yaml"
-    shell:
-        "python3 -m bio2zarr tskit2zarr convert -p {threads} --contig-id {wildcards.chromosome} {input} {output}"
+    script:
+        "scripts/generate_vcz.py"
