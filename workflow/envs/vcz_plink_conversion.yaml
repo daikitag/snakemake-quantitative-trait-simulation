@@ -2,6 +2,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
+  - python =3.12
   - tskit =0.6.4
   - numpy =2.2
   - pandas =2.2
