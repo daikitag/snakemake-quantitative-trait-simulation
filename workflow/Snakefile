@@ -115,7 +115,7 @@ rule slim_underdominance:
     log:
         f"logs/{output_pattern}/slim.log",
     conda:
-        "envs/slim.yaml"
+        "slim"
     shell:
         (
             "slim -d MUTATION_RATE={wildcards.mu} -d w={wildcards.w} -d shape={wildcards.shape} "
@@ -132,7 +132,7 @@ rule tszip_compression:
     output:
         f"{folder_pattern}/{{sample}}.tree.tsz",
     conda:
-        "envs/simulation.yaml"
+        "simulation"
     shell:
         "tszip {input}"
 
@@ -145,7 +145,7 @@ rule convert_allele:
     log:
         f"logs/{output_pattern}/convert_allele.log",
     conda:
-        "envs/simulation.yaml"
+        "simulation"
     script:
         "scripts/convert_allele.py"
 
@@ -162,7 +162,7 @@ rule effect_size_simulation:
         selection_scaling=SELECTION_SCALING_PARAMETER,
         seed=lambda wildcards: wildcards.effect_size_seed,
     conda:
-        "envs/simulation.yaml"
+        "simulation"
     script:
         "scripts/effect_size_simulation.py"
 
@@ -179,7 +179,7 @@ rule phenotype_simulation:
     log:
         f"logs/{output_pattern}/phenotype_{phenotype_pattern}.log",
     conda:
-        "envs/simulation.yaml"
+        "simulation"
     script:
         "scripts/phenotype_simulation.py"
 
@@ -192,7 +192,7 @@ rule plink_phenotype:
     log:
         f"logs/{output_pattern}/plink_phenotype_{phenotype_pattern}.log",
     conda:
-        "envs/simulation.yaml"
+        "simulation"
     script:
         "scripts/obtain_plink_phenotype.py"
     
@@ -211,7 +211,7 @@ rule neutral_recapitate_simulation:
         neutral_mu = lambda wildcards: wildcards.neutral_mu,
         neutral_seed = lambda wildcards: wildcards.neutral_seed,
     conda:
-        "envs/simulation.yaml"
+        "simulation"
     script:
         "scripts/neutral_recapitate_simulation.py"
 
@@ -227,22 +227,23 @@ rule generate_individual_id:
         ceu_number=lambda wildcards: wildcards.ceu,
         seed=lambda wildcards: wildcards.individual_seed,
     conda:
-        "envs/simulation.yaml"
+        "simulation"
     script:
         "scripts/obtain_individual_id.py"
+
 
 rule generate_vcz:
     output:
         directory(f"{folder_pattern}/{sample_tree_seq_pattern}.vcz"),
     input:
         ts=f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
-        individual_id=f"{folder_pattern}/individualid_{individual_id_pattern}.csv",
+        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
     params:
         maf=lambda wildcards: wildcards.maf,
     log:
         f"logs/{output_pattern}/sample_tree_seq_{sample_tree_seq_pattern}.log"
     conda:
-        "envs/vcz_plink_conversion.yaml"
+        "vcz_plink_conversion"
     threads:
         6
     resources:
