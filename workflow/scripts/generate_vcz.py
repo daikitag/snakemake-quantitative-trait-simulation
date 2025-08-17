@@ -1,3 +1,4 @@
+import numpy as np
 import tszip
 import pandas as pd
 
@@ -46,13 +47,19 @@ def maf_threshold(ts, maf):
     down_sample_ts = ts.delete_sites(remove_site)
     return down_sample_ts
 
+def subset_tree_seq(ts, selected_individuals):
+    selected_nodes = np.array([], dtype=int)
+    for individual in selected_individuals:
+        selected_nodes = np.concatenate((selected_nodes, ts.individual(individual).nodes))
+
+    return ts.simplify(selected_nodes, filter_individuals=False)
 
 def main():    
     ts = tszip.load(snakemake.input.ts)
-    ts = maf_threshold(ts, maf=float(snakemake.params.maf))
-
     individual_id_df = pd.read_csv(snakemake.input.individual_id)
-
+    ts = subset_tree_seq(ts, individual_id_df["individual_id"])    
+    ts = maf_threshold(ts, maf=float(snakemake.params.maf))
+   
     model_mapping = ts.map_to_vcf_model(
         individuals=individual_id_df["individual_id"],
         individual_names=individual_id_df["plink_id"]

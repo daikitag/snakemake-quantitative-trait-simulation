@@ -81,16 +81,21 @@ individual_id_pattern = (
     "yri_{yri}_ceu_{ceu}_individualseed_{individual_seed}"
 )
 
+plink_phenotype_pattern = (
+    "plink_phenotype_" + phenotype_pattern + individual_id_pattern
+)
+
 # These parameters are used to sample tree sequence
 sample_tree_seq_pattern = (
     recapitate_neutral_pattern + individual_id_pattern + "_MAF_{maf}"
 )
 
 sim_results_plink_phenotype = expand(
-    f"{folder_pattern}/plink_phenotype_{phenotype_pattern}.txt",
+    f"{folder_pattern}/{plink_phenotype_pattern}.txt",
     mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
     demography=DEMOGRAPHY, slim_seed=SLIM_SEED, degree=DEGREE,
-    effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED
+    effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED,
+    yri=YRI_NUMBER, ceu=CEU_NUMBER, individual_seed=INDIVIDUAL_SEED
 )
 
 final_output = expand(
@@ -182,19 +187,6 @@ rule phenotype_simulation:
         "simulation"
     script:
         "scripts/phenotype_simulation.py"
-
-rule plink_phenotype:
-    output:
-        f"{folder_pattern}/plink_phenotype_{phenotype_pattern}.txt",
-    input:
-        ts=f"{folder_pattern}/nucleotide_ts.tree.tsz",
-        phenotype_df=f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
-    log:
-        f"logs/{output_pattern}/plink_phenotype_{phenotype_pattern}.log",
-    conda:
-        "simulation"
-    script:
-        "scripts/obtain_plink_phenotype.py"
     
 
 rule neutral_recapitate_simulation:
@@ -231,6 +223,19 @@ rule generate_individual_id:
     script:
         "scripts/obtain_individual_id.py"
 
+
+rule plink_phenotype:
+    output:
+        f"{folder_pattern}/{plink_phenotype_pattern}.txt",
+    input:
+        phenotype_df=f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
+        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
+    log:
+        f"logs/{output_pattern}/{plink_phenotype_pattern}.log",
+    conda:
+        "simulation"
+    script:
+        "scripts/obtain_plink_phenotype.py"
 
 rule generate_vcz:
     output:
