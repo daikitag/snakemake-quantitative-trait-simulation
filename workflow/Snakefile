@@ -245,9 +245,9 @@ rule generate_vcz:
     conda:
         "vcz_plink_conversion"
     threads:
-        6
+        3
     resources:
-        cpus_per_task=6,
-        mem_mb_per_cpu=20000
+        cpus_per_task=3,
+        mem_mb_per_cpu=40000
     script:
         "scripts/generate_vcz.py"
