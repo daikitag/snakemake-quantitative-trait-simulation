@@ -11,8 +11,19 @@ def obtain_plink_phenotype(phenotype_df, individual_id_df):
     
     return plink_phenotype_df
 
-def main():   
-    phenotype_df = pd.read_csv(snk.input.phenotype_df)
+def merge_phenotype_df(phenotype_df_list):
+    phenotype_df = pd.read_csv(phenotype_df_list[0])
+    phenotype_df = phenotype_df.sort_values(by=["individual_id"])
+
+    for i in range(1, len(phenotype_df_list)):
+        add_df = pd.read_csv(phenotype_df_list[i])
+        add_df = add_df.sort_values(by=["individual_id"])
+        phenotype_df["phenotype"] += add_df["phenotype"]
+    
+    return phenotype_df
+
+def main():
+    phenotype_df = merge_phenotype_df(snk.input.phenotype_df_list)
 
     individual_id_df = pd.read_csv(snk.input.individual_id)
     

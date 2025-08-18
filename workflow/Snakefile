@@ -85,14 +85,18 @@ plink_phenotype_pattern = (
     "plink_phenotype_" + phenotype_pattern + individual_id_pattern
 )
 
+f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
+
+
+
 # These parameters are used to sample tree sequence
 sample_tree_seq_pattern = (
     recapitate_neutral_pattern + individual_id_pattern + "_MAF_{maf}"
 )
 
 sim_results_plink_phenotype = expand(
-    f"{folder_pattern}/{plink_phenotype_pattern}.txt",
-    mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
+    f"{folder_pattern_without_chromosome}/{plink_phenotype_pattern}.txt",
+    mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE,
     demography=DEMOGRAPHY, slim_seed=SLIM_SEED, degree=DEGREE,
     effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED,
     yri=YRI_NUMBER, ceu=CEU_NUMBER, individual_seed=INDIVIDUAL_SEED
@@ -226,12 +230,12 @@ rule generate_individual_id:
 
 rule plink_phenotype:
     output:
-        f"{folder_pattern}/{plink_phenotype_pattern}.txt",
+        f"{folder_pattern_without_chromosome}/{plink_phenotype_pattern}.txt"
     input:
-        phenotype_df=f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
+        phenotype_df_list=expand(f"{folder_pattern}/phenotype_{phenotype_pattern}.csv", chromosome=CHROMOSOME, allow_missing=True),
         individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
     log:
-        f"logs/{output_pattern}/{plink_phenotype_pattern}.log",
+        f"logs/{folder_pattern_without_chromosome}/{plink_phenotype_pattern}.log",
     conda:
         "simulation"
     script:
