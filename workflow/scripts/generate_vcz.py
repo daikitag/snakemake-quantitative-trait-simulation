@@ -69,7 +69,8 @@ def main():
         ts,
         vcz_path=snakemake.output[0],
         model_mapping=model_mapping,
-        worker_processes=snakemake.threads
+        worker_processes=snakemake.threads,
+        contig_id=str(snakemake.params.chromosome)
     )
 
     

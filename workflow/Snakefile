@@ -249,6 +249,7 @@ rule generate_vcz:
         individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
     params:
         maf=lambda wildcards: wildcards.maf,
+        chromosome=lambda wildcards: wildcards.chromosome
     log:
         f"logs/{output_pattern}/sample_tree_seq_{sample_tree_seq_pattern}.log"
     conda:
