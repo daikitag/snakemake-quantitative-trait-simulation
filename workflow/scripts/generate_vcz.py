@@ -1,5 +1,4 @@
 import numpy as np
-import tszip
 import pandas as pd
 
 import tskit
@@ -55,7 +54,7 @@ def subset_tree_seq(ts, selected_individuals):
     return ts.simplify(selected_nodes, filter_individuals=False)
 
 def main():    
-    ts = tszip.load(snakemake.input.ts)
+    ts = tskit.load(snakemake.input.ts)
     individual_id_df = pd.read_csv(snakemake.input.individual_id)
     ts = subset_tree_seq(ts, individual_id_df["individual_id"])    
     ts = maf_threshold(ts, maf=float(snakemake.params.maf))

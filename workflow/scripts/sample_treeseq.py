@@ -1,4 +1,3 @@
-import tszip
 import numpy as np
 import tskit
 import collections
@@ -51,7 +50,7 @@ def subset_tree_seq(ts, selected_individuals):
     return ts.simplify(selected_nodes)
         
 def main():
-    ts = tszip.load(snk.input.ts)
+    ts = tskit.load(snk.input.ts)
     individual_df = pd.read_csv(snk.input.individual_id)
     ts = subset_tree_seq(ts, individual_df["individual_id"])
     ts = maf_threshold(ts, maf=float(snk.params.maf))

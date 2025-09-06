@@ -1,4 +1,4 @@
-import tszip
+import tskit
 import numpy as np
 import pandas as pd
 
@@ -50,7 +50,7 @@ def obtain_individual_df(ts, yri_number, ceu_number, rng):
     return individual_id_df
 
 def main():    
-    ts = tszip.load(snk.input[0])
+    ts = tskit.load(snk.input[0])
     rng = np.random.default_rng(seed=int(snk.params.seed))
 
     individual_id_df = obtain_individual_df(

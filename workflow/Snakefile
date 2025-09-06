@@ -135,22 +135,22 @@ rule slim_underdominance:
             + "workflow/scripts/underdominance_demography_genetic_map.slim > {log}"
         )
 
-rule tszip_compression:
-    input:
-        f"{folder_pattern}/{{sample}}.tree",
-    output:
-        f"{folder_pattern}/{{sample}}.tree.tsz",
-    conda:
-        "simulation"
-    shell:
-        "tszip {input}"
+#rule tszip_compression:
+#    input:
+#        f"{folder_pattern}/{{sample}}.tree",
+#    output:
+#        f"{folder_pattern}/{{sample}}.tree.tsz",
+#    conda:
+#        "simulation"
+#    shell:
+#        "tszip {input}"
 
 
 rule convert_allele:
     output:
-        f"{folder_pattern}/nucleotide_ts.tree.tsz",
+        f"{folder_pattern}/nucleotide_ts.tree",
     input:
-        f"{folder_pattern}/slim_allele_ts.tree.tsz",
+        f"{folder_pattern}/slim_allele_ts.tree",
     log:
         f"logs/{output_pattern}/convert_allele.log",
     conda:
@@ -162,7 +162,7 @@ rule effect_size_simulation:
     output:
         f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
     input:
-        f"{folder_pattern}/nucleotide_ts.tree.tsz",
+        f"{folder_pattern}/nucleotide_ts.tree",
     log:
         f"logs/{output_pattern}/effect_size_{effect_size_pattern}.log",
     params:
@@ -180,7 +180,7 @@ rule phenotype_simulation:
     output:
         f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
     input:
-        ts=f"{folder_pattern}/nucleotide_ts.tree.tsz",
+        ts=f"{folder_pattern}/nucleotide_ts.tree",
         mutation_df=f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
     params:
         h2=lambda wildcards: wildcards.h2,
@@ -195,9 +195,9 @@ rule phenotype_simulation:
 
 rule neutral_recapitate_simulation:
     output:
-        f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
+        f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree",
     input:
-        f"{folder_pattern}/nucleotide_ts.tree.tsz",
+        f"{folder_pattern}/nucleotide_ts.tree",
     log:
         f"logs/{output_pattern}/neutral_recapitate_{recapitate_neutral_pattern}.log",
     params:
@@ -215,7 +215,7 @@ rule generate_individual_id:
     output:
         f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
     input:
-        f"{folder_pattern_without_chromosome}/chromosome_{CHROMOSOME[0]}/slim_allele_ts.tree.tsz",
+        f"{folder_pattern_without_chromosome}/chromosome_{CHROMOSOME[0]}/slim_allele_ts.tree",
     log:
         f"logs/{folder_pattern_without_chromosome}/generate_individual_id_{individual_id_pattern}.log",
     params:
@@ -245,7 +245,7 @@ rule generate_vcz:
     output:
         directory(f"{folder_pattern}/{sample_tree_seq_pattern}.vcz"),
     input:
-        ts=f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree.tsz",
+        ts=f"{folder_pattern}/processed_ts_{recapitate_neutral_pattern}.tree",
         individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
     params:
         maf=lambda wildcards: wildcards.maf,

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import tszip
+import tskit
 
 from snakemake.script import snakemake as snk
 
@@ -63,7 +63,7 @@ def sim_tstrait_pleiotropy(ts, n, w, selection_scaling, seed):
 
 
 def main():    
-    ts = tszip.load(snk.input[0])
+    ts = tskit.load(snk.input[0])
     mutation_df = sim_tstrait_pleiotropy(
         ts = ts,
         n = int(snk.params.degree),
