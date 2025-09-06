@@ -2,8 +2,8 @@
 
 #SBATCH --time 3-00:00
 
-#SBATCH --output="/vols/bitbucket/tagami/job_output/snakemake/%x-%A-std-output.out"
-#SBATCH --error="/vols/bitbucket/tagami/job_output/snakemake/%x-%A-err-output.out"
+#SBATCH --output="snakemake-log/%x-%A-std-output.out"
+#SBATCH --error="snakemake-log/%x-%A-err-output.out"
 
 #SBATCH --mail-user=daiki.tagami@hertford.ox.ac.uk
 #SBATCH --mail-type=ALL
