@@ -1,8 +1,6 @@
-import numpy as np
-import pandas as pd
+import sys
 import tskit
-
-from snakemake.script import snakemake as snk
+import pandas as pd
 
 def obtain_mutation_df(ts, selection_scaling):
     """
@@ -40,40 +38,10 @@ def obtain_mutation_df(ts, selection_scaling):
 
     return mutation_df
 
-def simulate_effect(selection_coeff, n, w2, rng):
-    """
-    Simulates effect size from a normal distribution based on the selection coefficient
-    of mutations
-    n is the degree of pleiotropic effects
-    """
-    effect_size = rng.normal(loc = 0, scale = np.sqrt(w2/n*selection_coeff))
-    return effect_size
-
-def sim_tstrait_pleiotropy(ts, n, w, selection_scaling, seed):
-    """
-    ts is the tree sequence of interest
-    n is the degree of pleiotropic effects
-    seed is the seed that will be used in the tstrait simulation
-    w2 is the stabilizing selection parameter, which will be 1 by default
-    selectin_scaling is the scaling factor for the underdominance simulation model
-    """
-    rng = np.random.default_rng(seed=seed)
-    mutation_df = obtain_mutation_df(ts, selection_scaling)
-    mutation_df["effect_size"] = mutation_df.apply(lambda row: simulate_effect(row["selection_coeff"], w2=w**2, n=n, rng=rng), axis=1)
-    return mutation_df
-
-
 def main():    
-    ts = tskit.load(snk.input[0])
-    mutation_df = sim_tstrait_pleiotropy(
-        ts = ts,
-        n = int(snk.params.degree),
-        w = float(snk.params.w),
-        selection_scaling= float(snk.params.selection_scaling),
-        seed = int(snk.params.seed)
-    )
-
-    mutation_df.to_csv(snk.output[0], index=False)
+    ts = tskit.load(sys.argv[1])
+    mutation_df = obtain_mutation_df(ts, selection_scaling=1e10)
+    mutation_df.to_csv(sys.argv[2], index=False)
     
 
 if __name__ == '__main__':

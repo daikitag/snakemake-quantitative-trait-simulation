@@ -4,24 +4,22 @@ mu: 1e-10
 # Gamma distribution parameters for simulating population-scaled
 # mutation size
 # Shape of Gamma distribution
-shape: 1
+shape: 0.19
 # Scale of Gamma distribution
-scale: 10
-# Population size of population-scaled mutation size
-N: 1e4
+scale: 0.0741
 # Parameter of stabilizing selection model (w)
 w: 1
 
 # Filename of recombination map in "recombination_map" directory
 # This should be a number to specify the chromosome number in
 # recombination map file
-chromosome: 
-- 22
+chromosome:
+  - 1
 # Filename of JSON demography file in "demography" directory
 # Do not add ".json" suffix to filename
 demography: "demography_sample"
 # SLiM simulation seed
-slim_seed: 1
+slim_seed: 999
 
 # Degree of pleiotropic effects
 degree: 100
@@ -43,14 +41,14 @@ recapitate_seed: 4
 neutral_seed: 5
 
 # Number of YRI individuals:
-YRI_number: 1000
+YRI_number: 10
 # Number of CEU individuals:
-CEU_number: 1000
+CEU_number: 100
 # Seed to select individual IDs:
 individual_seed: 2
 
 # MAF threshold
-MAF: 0.0001
+MAF: 0.0005
 
 # These parameters are important for simulations
 # but they do not need to be modified

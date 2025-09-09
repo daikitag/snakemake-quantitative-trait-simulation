@@ -12,7 +12,7 @@ initialize() {
     // model by using underdominance selection model
     // The second term represents selection coefficient in the stabilizing selection
     // model, a^2/w^2
-    scriptForQTLs = "-0.5 * rgamma(n=1, mean=shape*scale, shape=shape)/(2*N*w^2) / selection_scaling;";
+    scriptForQTLs = "-0.5 * rgamma(n=1, mean=shape*scale, shape=shape)/(2*w^2) / selection_scaling;";
     initializeMutationType("m1", selection_scaling, "s", scriptForQTLs);
 
     // g1 genomic element type: uses m1 for all mutations
