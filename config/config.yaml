@@ -17,9 +17,9 @@ chromosome:
   - 1
 # Filename of JSON demography file in "demography" directory
 # Do not add ".json" suffix to filename
-demography: "demography_sample"
+demography: "demography_4M"
 # SLiM simulation seed
-slim_seed: 999
+slim_seed: 10
 
 # Degree of pleiotropic effects
 degree: 100
