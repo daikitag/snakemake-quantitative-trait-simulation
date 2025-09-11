@@ -19,7 +19,7 @@ chromosome:
 # Do not add ".json" suffix to filename
 demography: "demography_4M"
 # SLiM simulation seed
-slim_seed: 1000
+slim_seed: 10
 
 # Degree of pleiotropic effects
 degree: 100
