@@ -70,7 +70,7 @@ def main():
         n = int(snk.params.degree),
         w = float(snk.params.w),
         selection_scaling= float(snk.params.selection_scaling),
-        seed = int(snk.params.seed)
+        seed = int(snk.params.seed) + int(snk.params.chromosome),
     )
 
     mutation_df.to_csv(snk.output[0], index=False)

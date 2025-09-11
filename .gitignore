@@ -5,3 +5,5 @@ recombination_map/*.txt
 *.ipynb
 *.tree
 *.svg
+recombination_map/HapMapII_GRCh38/*.txt
+recombination_map/HapMapII_GRCh38.tar.gz

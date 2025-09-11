@@ -18,7 +18,8 @@ def main():
     mutation_df = pd.read_csv(snk.input.mutation_df)
     
     phenotype_df = simulate_phenotype(
-        ts=ts, mutation_df=mutation_df, h2=float(snk.params.h2), seed=int(snk.params.seed)
+        ts=ts, mutation_df=mutation_df, h2=float(snk.params.h2),
+        seed=int(snk.params.seed)
     )
     
     phenotype_df.to_csv(snk.output[0], index=False)

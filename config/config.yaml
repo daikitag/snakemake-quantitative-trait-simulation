@@ -19,12 +19,12 @@ chromosome:
 # Do not add ".json" suffix to filename
 demography: "demography_4M"
 # SLiM simulation seed
-slim_seed: 10
+slim_seed: 1000
 
 # Degree of pleiotropic effects
 degree: 100
 # Effect size simulation seed
-effect_size_seed: 2
+effect_size_seed: 1
 
 # Narrow-sense heritability
 h2: 0.4
@@ -41,9 +41,9 @@ recapitate_seed: 4
 neutral_seed: 5
 
 # Number of YRI individuals:
-YRI_number: 10
+YRI_number: 30000
 # Number of CEU individuals:
-CEU_number: 100
+CEU_number: 340000
 # Seed to select individual IDs:
 individual_seed: 2
 

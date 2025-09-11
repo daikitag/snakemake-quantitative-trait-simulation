@@ -59,20 +59,21 @@ folder_pattern = (
     "output/" + output_pattern
 )
 
-# These parameters are used for simulating neutral burn-in (recapitation) and neutral mutations
-recapitate_neutral_pattern = (
-    "ancestralNe_{ancestral_Ne}_recapseed_{recapitate_seed}" +
-    "_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}"
-)
+# +"_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}"
 
 # These parameters are used to select individual IDs
 individual_id_pattern = (
     "yri_{yri}_ceu_{ceu}_individualseed_{individual_seed}"
 )
 
+# These parameters are used to sample tree sequence and conduct recapitation
+sample_tree_seq_pattern = (
+    individual_id_pattern + "_ancestralNe_{ancestral_Ne}_recapseed_{recapitate_seed}"
+)
+
 # These parameters are used to simulate effect sizes from mutation's selection coefficients
 effect_size_pattern = (
-    individual_id_pattern + "_degree_{degree}_effectseed_{effect_size_seed}"
+    sample_tree_seq_pattern + "_degree_{degree}_effectseed_{effect_size_seed}"
 )
 
 # These parameters are used to simulate phenotypes of individuals
@@ -84,30 +85,30 @@ plink_phenotype_pattern = (
     "plink_phenotype_" + phenotype_pattern
 )
 
-
-# These parameters are used to sample tree sequence
-sample_tree_seq_pattern = (
-    recapitate_neutral_pattern + individual_id_pattern + "_MAF_{maf}"
+# VCZ pattern
+vcz_pattern = (
+    sample_tree_seq_pattern + "_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}_MAF_{maf}"
 )
 
-#sim_results_plink_phenotype = expand(
-#    f"{folder_pattern_without_chromosome}/{plink_phenotype_pattern}.txt",
-#    mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE,
-#    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, degree=DEGREE,
-#    effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED,
-#    yri=YRI_NUMBER, ceu=CEU_NUMBER, individual_seed=INDIVIDUAL_SEED
-#)
+sim_results_plink_phenotype = expand(
+    f"{folder_pattern}/{plink_phenotype_pattern}.txt",
+    mu=MU, w=W, shape=SHAPE, scale=SCALE, chromosome=CHROMOSOME,
+    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, degree=DEGREE,
+    effect_size_seed=EFFECT_SIZE_SEED, h2=H2, phenotype_seed=PHENOTYPE_SEED,
+    yri=YRI_NUMBER, ceu=CEU_NUMBER, individual_seed=INDIVIDUAL_SEED,
+    ancestral_Ne=ANCESTRAL_NE, recapitate_seed=RECAPITATE_SEED,
+)
 
-#final_output = expand(
-#    f"{folder_pattern}/{sample_tree_seq_pattern}.vcz",
-#    mu=MU, w=W, shape=SHAPE, scale=SCALE, N=POP_SIZE, chromosome=CHROMOSOME,
-#    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
-#    recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
-#    neutral_seed=NEUTRAL_SEED,
-#    yri=YRI_NUMBER, ceu=CEU_NUMBER,
-#    individual_seed=INDIVIDUAL_SEED,
-#    maf=MAF
-#)
+final_output = expand(
+    f"{folder_pattern}/{vcz_pattern}.vcz",
+    mu=MU, w=W, shape=SHAPE, scale=SCALE, chromosome=CHROMOSOME,
+    demography=DEMOGRAPHY, slim_seed=SLIM_SEED, ancestral_Ne=ANCESTRAL_NE,
+    recapitate_seed=RECAPITATE_SEED, neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+    yri=YRI_NUMBER, ceu=CEU_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    maf=MAF
+)
 
 relatedness_table = expand(
     f"{folder_pattern}/individual_parents.csv",
@@ -118,8 +119,8 @@ relatedness_table = expand(
 rule all:
     input:
         relatedness_table,
-        #sim_results_plink_phenotype,
-        #final_output,
+        sim_results_plink_phenotype,
+        final_output,
 
 rule slim_underdominance:
     output:
@@ -132,7 +133,7 @@ rule slim_underdominance:
         (
             "slim -d MUTATION_RATE={wildcards.mu} -d w={wildcards.w} -d shape={wildcards.shape} "
             + "-d scale={wildcards.scale} -d SEED={wildcards.slim_seed} -d 'tree_filename=\"{output}\"' "
-            + "-d selection_scaling={SELECTION_SCALING_PARAMETER} "
+            + "-d selection_scaling={SELECTION_SCALING_PARAMETER} -d CHROMOSOME={wildcards.chromosome} "
             + "-d 'RECOMBINATION_MAP=\"recombination_map/HapMapII_GRCh38/genetic_map_Hg38_chr{wildcards.chromosome}.txt\"' "
             + "-d 'JSON_FILE=\"demography/{wildcards.demography}.json\"' "
             + "workflow/scripts/underdominance_demography_genetic_map.slim > {log}"
@@ -149,7 +150,127 @@ rule obtain_parents:
         "simulation"
     script:
         "scripts/obtain_parents.py"
-    
+
+rule obtain_unrelated_individuals:
+    output:
+        f"{folder_pattern}/unrelated_individualid_{individual_id_pattern}.csv",
+    input:
+        f"{folder_pattern}/individual_parents.csv",
+    log:
+        f"logs/{output_pattern}/obtain_unrelated_individuals_{individual_id_pattern}.log",
+    params:
+        yri_number=lambda wildcards: wildcards.yri,
+        ceu_number=lambda wildcards: wildcards.ceu,
+        seed=lambda wildcards: wildcards.individual_seed,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    script:
+        "scripts/obtain_unrelated_individuals.py"
+
+rule recapitate_subset_simulation:
+    output:
+        f"{folder_pattern}/unrelated_subset_nucleotide_{sample_tree_seq_pattern}.tree",
+    input:
+        individual_id=f"{folder_pattern}/unrelated_individualid_{individual_id_pattern}.csv",
+        ts=f"{folder_pattern}/slim_allele_ts.tree",
+    log:
+        f"logs/{output_pattern}/neutral_recapitate_{sample_tree_seq_pattern}.log",
+    params:
+        genetic_map=lambda wildcards: f"recombination_map/HapMapII_GRCh38/genetic_map_Hg38_chr{wildcards.chromosome}.txt",
+        ancestral_Ne = lambda wildcards: wildcards.ancestral_Ne,
+        recapitate_seed = lambda wildcards: wildcards.recapitate_seed,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    conda:
+        "simulation"
+    script:
+        "scripts/recapitate_sample_simulation.py"
+
+rule effect_size_simulation:
+    output:
+        f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
+    input:
+        f"{folder_pattern}/unrelated_subset_nucleotide_{sample_tree_seq_pattern}.tree",
+    log:
+        f"logs/{output_pattern}/effect_size_{effect_size_pattern}.log",
+    params:
+        w=lambda wildcards: wildcards.w,
+        degree=lambda wildcards: wildcards.degree,
+        selection_scaling=SELECTION_SCALING_PARAMETER,
+        seed=lambda wildcards: wildcards.effect_size_seed,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    conda:
+        "simulation"
+    script:
+        "scripts/effect_size_simulation.py"
+
+rule phenotype_simulation:
+    output:
+        f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
+    input:
+        ts=f"{folder_pattern}/unrelated_subset_nucleotide_{sample_tree_seq_pattern}.tree",
+        mutation_df=f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
+    params:
+        h2=lambda wildcards: wildcards.h2,
+        seed=lambda wildcards: wildcards.phenotype_seed,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    log:
+        f"logs/{output_pattern}/phenotype_{phenotype_pattern}.log",
+    conda:
+        "simulation"
+    script:
+        "scripts/phenotype_simulation.py"
+
+
+rule plink_phenotype:
+    output:
+        f"{folder_pattern}/{plink_phenotype_pattern}.txt"
+    input:
+        phenotype_df=f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
+        individual_id=f"{folder_pattern}/unrelated_individualid_{individual_id_pattern}.csv",
+    log:
+        f"logs/{folder_pattern}/{plink_phenotype_pattern}.log",
+    conda:
+        "simulation"
+    script:
+        "scripts/obtain_plink_phenotype.py"        
+
+rule generate_vcz:
+    output:
+        directory(f"{folder_pattern}/{vcz_pattern}.vcz"),
+    input:
+        ts=f"{folder_pattern}/unrelated_subset_nucleotide_{sample_tree_seq_pattern}.tree",
+        individual_id=f"{folder_pattern}/unrelated_individualid_{individual_id_pattern}.csv",
+    params:
+        chromosome=lambda wildcards: wildcards.chromosome,
+        neutral_mu=lambda wildcards: wildcards.neutral_mu,
+        neutral_seed=lambda wildcards: wildcards.neutral_seed,
+        maf=lambda wildcards: wildcards.maf,
+    log:
+        f"logs/{output_pattern}/vcz_{vcz_pattern}.log"
+    conda:
+        "vcz_plink_conversion"
+    threads:
+        2
+    resources:
+        cpus_per_task=2,
+        mem_mb_per_cpu=160000
+    script:
+        "scripts/generate_vcz.py"
+
+
+
+
+
+#rule convert_allele:
+#    output:
+#        f"{folder_pattern}/nucleotide_ts.tree",
+#    input:
+#        f"{folder_pattern}/slim_allele_ts.tree",
+#    log:
+#        f"logs/{output_pattern}/convert_allele.log",
+#    conda:
+#        "simulation"
+#    script:
+#        "scripts/convert_allele.py"
 
 #rule tszip_compression:
 #    input:
@@ -161,119 +282,21 @@ rule obtain_parents:
 #    shell:
 #        "tszip {input}"
 
-rule generate_individual_id:
-    output:
-        f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
-    input:
-        f"{folder_pattern_without_chromosome}/chromosome_{CHROMOSOME[0]}/slim_allele_ts.tree",
-    log:
-        f"logs/{folder_pattern_without_chromosome}/generate_individual_id_{individual_id_pattern}.log",
-    params:
-        yri_number=lambda wildcards: wildcards.yri,
-        ceu_number=lambda wildcards: wildcards.ceu,
-        seed=lambda wildcards: wildcards.individual_seed,
-    conda:
-        "simulation"
-    script:
-        "scripts/obtain_individual_id.py"
-
-rule subset_treeseq:
-    output:
-        f"{folder_pattern}/subset_nucleotide_{individual_id_pattern}.tree",
-    input:
-        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
-        ts=f"{folder_pattern}/slim_allele_ts.tree",
-    log:
-        f"logs/{folder_pattern}/subset_nucleotide_{individual_id_pattern}.log",
-    conda:
-        "simulation"
-    script:
-        "scripts/subset_treeseq.py"
+#rule subset_treeseq:
+#    output:
+#        f"{folder_pattern}/subset_nucleotide_{individual_id_pattern}.tree",
+#    input:
+#        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
+#        ts=f"{folder_pattern}/slim_allele_ts.tree",
+#    log:
+#        f"logs/{folder_pattern}/subset_nucleotide_{individual_id_pattern}.log",
+#    conda:
+#        "simulation"
+#    script:
+#        "scripts/subset_treeseq.py"
 
 
-rule effect_size_simulation:
-    output:
-        f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
-    input:
-        f"{folder_pattern}/subset_nucleotide_{individual_id_pattern}.tree",
-    log:
-        f"logs/{output_pattern}/effect_size_{effect_size_pattern}.log",
-    params:
-        w=lambda wildcards: wildcards.w,
-        degree=lambda wildcards: wildcards.degree,
-        selection_scaling=SELECTION_SCALING_PARAMETER,
-        seed=lambda wildcards: wildcards.effect_size_seed,
-    conda:
-        "simulation"
-    script:
-        "scripts/effect_size_simulation.py"
 
 
-rule phenotype_simulation:
-    output:
-        f"{folder_pattern}/phenotype_{phenotype_pattern}.csv",
-    input:
-        ts=f"{folder_pattern}/subset_nucleotide_{individual_id_pattern}.tree",
-        mutation_df=f"{folder_pattern}/effect_size_{effect_size_pattern}.csv",
-    params:
-        h2=lambda wildcards: wildcards.h2,
-        seed=lambda wildcards: wildcards.phenotype_seed,
-    log:
-        f"logs/{output_pattern}/phenotype_{phenotype_pattern}.log",
-    conda:
-        "simulation"
-    script:
-        "scripts/phenotype_simulation.py"
 
 
-rule plink_phenotype:
-    output:
-        f"{folder_pattern_without_chromosome}/{plink_phenotype_pattern}.txt"
-    input:
-        phenotype_df_list=expand(f"{folder_pattern}/phenotype_{phenotype_pattern}.csv", chromosome=CHROMOSOME, allow_missing=True),
-        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
-    log:
-        f"logs/{folder_pattern_without_chromosome}/{plink_phenotype_pattern}.log",
-    conda:
-        "simulation"
-    script:
-        "scripts/obtain_plink_phenotype.py"
-
-rule neutral_recapitate_simulation:
-    output:
-        f"{folder_pattern}/processed_ts_{sample_tree_seq_pattern}.tree",
-    input:
-        f"{folder_pattern}/subset_nucleotide_{individual_id_pattern}.tree",
-    log:
-        f"logs/{output_pattern}/neutral_recapitate_{sample_tree_seq_pattern}.log",
-    params:
-        genetic_map=lambda wildcards: f"recombination_map/HapMapII_GRCh38/genetic_map_Hg38_chr{wildcards.chromosome}.txt",
-        ancestral_Ne = lambda wildcards: wildcards.ancestral_Ne,
-        recapitate_seed = lambda wildcards: wildcards.recapitate_seed,
-        neutral_mu = lambda wildcards: wildcards.neutral_mu,
-        neutral_seed = lambda wildcards: wildcards.neutral_seed,
-        maf=lambda wildcards: wildcards.maf,
-    conda:
-        "simulation"
-    script:
-        "scripts/neutral_recapitate_simulation.py"
-
-rule generate_vcz:
-    output:
-        directory(f"{folder_pattern}/{sample_tree_seq_pattern}.vcz"),
-    input:
-        ts=f"{folder_pattern}/processed_ts_{sample_tree_seq_pattern}.tree",
-        individual_id=f"{folder_pattern_without_chromosome}/individualid_{individual_id_pattern}.csv",
-    params:
-        chromosome=lambda wildcards: wildcards.chromosome
-    log:
-        f"logs/{output_pattern}/sample_tree_seq_{sample_tree_seq_pattern}.log"
-    conda:
-        "vcz_plink_conversion"
-    threads:
-        3
-    resources:
-        cpus_per_task=3,
-        mem_mb_per_cpu=100000
-    script:
-        "scripts/generate_vcz.py"
